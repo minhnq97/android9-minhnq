@@ -42,7 +42,7 @@ public class GameWindow extends Frame {
         setSize(600, 750);
 
         try {
-            player =  new PlayerController(Utils.loadImage("res/plane3.png"), 260, 670);
+            player = new PlayerController(Utils.loadImage("res/plane3.png"), 260, 670);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -159,15 +159,15 @@ public class GameWindow extends Frame {
 
 
                     //player
-                    player.processInput(isUpPressed,isDownPressed,isLeftPressed,isRightPressed,isFirePressed);
-
+                    player.processInput(isUpPressed, isDownPressed, isLeftPressed, isRightPressed, isFirePressed);
+                    player.update();
 
                     //bullet
 
                     for (Bullet bullet : bullets) {
                         bullet.update();
                     }
-                    player.update();
+
 
                     //enemy
                     enemyTime -= 17;
@@ -177,9 +177,9 @@ public class GameWindow extends Frame {
                     }
 
                     if (isEnemyAppear) {
-                        for (int x=0;x<getWidth();x+=100){
+                        for (int x = 0; x < getWidth(); x += 100) {
                             EnemyController enemy = null;
-                            if(x<300){
+                            if (x < 300) {
                                 try {
                                     enemy = new EnemyController(x, 0, Utils.loadImage("res/plane1.png"));
                                 } catch (IOException e) {
@@ -203,6 +203,17 @@ public class GameWindow extends Frame {
                         e.update();
                     }
 
+                    for (int i=0;i<enemies.size();i++){
+                        for (int j=0;j<bullets.size();j++){
+                            if(bullets.get(j).getGameRect().isCollide(enemies.get(i).getGameRect())){
+                                bullets.remove(bullets.get(j));
+                                enemies.remove(enemies.get(i));
+                                i--;
+                                j--;
+                            }
+                        }
+                    }
+
                     //draw
                     repaint();
                 }
@@ -219,7 +230,6 @@ public class GameWindow extends Frame {
 
         for (Bullet bullet : bullets) {
             bullet.draw(bufferedGraphics);
-
         }
 
         for (EnemyController enemy : enemies) {
@@ -227,7 +237,6 @@ public class GameWindow extends Frame {
         }
 
         //drawing from buffer to window
-
         graphics.drawImage(bufferedImage, 0, 0, null);
     }
 

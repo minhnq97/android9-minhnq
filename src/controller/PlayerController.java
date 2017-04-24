@@ -26,7 +26,7 @@ public class PlayerController {
 
     public PlayerController(Image playerImage, int x, int y) {
         imageRenderer = new ImageRenderer(playerImage);
-        gameRect = new GameRect(x, y, 40, 40);
+        gameRect = new GameRect(x, y, 70, 51);
     }
 
     public Image getPlayerImage() {
@@ -66,7 +66,7 @@ public class PlayerController {
             isCoolDown=true;
             Bullet bullet = null;
             try {
-                bullet = new Bullet(Utils.loadImage("res/bullet.png"), gameRect.getX(), gameRect.getY());
+                bullet = new Bullet(Utils.loadImage("res/bullet.png"), gameRect.getX()+30, gameRect.getY());
             } catch (IOException e) {
                 e.printStackTrace();
             }

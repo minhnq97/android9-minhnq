@@ -1,22 +1,27 @@
 package model;
 
+import view.ImageRenderer;
+
 import java.awt.*;
 
 /**
  * Created by Quang Minh on 11/04/2017.
  */
 public class Bullet {
+    private GameRect gameRect;
+    private ImageRenderer imageRenderer;
     private Image bulletImage;
-    private int xBullet;
-    private int yBullet;
 
     public Bullet() {
     }
 
-    public Bullet(Image bulletImage, int xBullet, int yBullet) {
-        this.bulletImage = bulletImage;
-        this.xBullet = xBullet + 34;
-        this.yBullet = yBullet;
+    public Bullet(Image bulletImage, int x, int y) {
+        imageRenderer = new ImageRenderer(bulletImage);
+        gameRect = new GameRect(x,y,13,33);
+    }
+
+    public GameRect getGameRect() {
+        return gameRect;
     }
 
     public Image getBulletImage() {
@@ -27,27 +32,11 @@ public class Bullet {
         this.bulletImage = bulletImage;
     }
 
-    public int getxBullet() {
-        return xBullet;
-    }
-
-    public void setxBullet(int xBullet) {
-        this.xBullet = xBullet;
-    }
-
-    public int getyBullet() {
-        return yBullet;
-    }
-
-    public void setyBullet(int yBullet) {
-        this.yBullet = yBullet;
-    }
-
     public void draw(Graphics graphics){
-        graphics.drawImage(bulletImage, xBullet, yBullet, null);
+        imageRenderer.render(graphics,gameRect);
     }
 
     public void update(){
-        yBullet-=10;
+        gameRect.move(0,-10);
     }
 }

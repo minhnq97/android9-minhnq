@@ -36,4 +36,24 @@ public class GameRect {
         this.x += dx;
         this.y += dy;
     }
+
+    public boolean isCollide(GameRect gameRect){
+        if(x>=gameRect.getX()){
+            if(Math.abs(x-gameRect.getX()+width)<(width+gameRect.getWidth())    //x is left from gamerect
+                    && Math.abs(y-gameRect.getY()+height) < (height+gameRect.getHeight())){
+                System.out.println();
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if(Math.abs(gameRect.getX()+gameRect.getWidth()-x)<(width+gameRect.getWidth())      //x is right from gamerect
+                    && Math.abs(y-gameRect.getY()+height) < (height+gameRect.getHeight())){
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+    }
 }
