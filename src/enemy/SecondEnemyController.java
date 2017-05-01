@@ -1,11 +1,14 @@
-package controller;
+package enemy;
+
+import controller.MoveBehavior;
+import enemy.EnemyController;
 
 import java.awt.*;
 
 /**
  * Created by Quang Minh on 17/04/2017.
  */
-public class SecondEnemyController extends EnemyController{
+public class SecondEnemyController extends EnemyController {
     public SecondEnemyController(int x, int y, Image image) {
         super(x, y, image);
     }

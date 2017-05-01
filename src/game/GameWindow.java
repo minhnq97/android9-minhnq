@@ -1,5 +1,11 @@
+package game;
+
+import bonus.HeartController;
 import controller.*;
-import model.Bullet;
+import enemy.EnemyController;
+import enemy.SecondEnemyController;
+import player.BulletController;
+import player.PlayerController;
 import util.Utils;
 
 import java.awt.*;
@@ -9,7 +15,9 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
 
 /**
@@ -17,10 +25,11 @@ import java.util.Random;
  */
 public class GameWindow extends Frame {
     private Image backgroundImage;
+    //objects
     private PlayerController player;
     private ArrayList<EnemyController> enemies;
-    private MoveBehavior moveBehavior;
-    private ArrayList<Bullet> bullets;
+    private ArrayList<HeartController> hearts;
+    private ArrayList<BulletController> bullets;
 
     private BufferedImage bufferedImage;
     private Graphics bufferedGraphics;
@@ -36,6 +45,9 @@ public class GameWindow extends Frame {
     private int enemyTime = 3000;
     private boolean isEnemyAppear;
 
+    //generate bonus
+    private boolean isHeartAppear;
+
     public GameWindow() {
         //initialize objects
         setVisible(true);
@@ -48,7 +60,7 @@ public class GameWindow extends Frame {
         }
 
         enemies = new ArrayList<>();
-
+        hearts = new ArrayList<>();
         bullets = new ArrayList<>();
         player.setBullets(bullets);
         isEnemyAppear = true;
@@ -164,7 +176,7 @@ public class GameWindow extends Frame {
 
                     //bullet
 
-                    for (Bullet bullet : bullets) {
+                    for (BulletController bullet : bullets) {
                         bullet.update();
                     }
 
@@ -203,16 +215,32 @@ public class GameWindow extends Frame {
                         e.update();
                     }
 
-                    for (int i=0;i<enemies.size();i++){
-                        for (int j=0;j<bullets.size();j++){
-                            if(bullets.get(j).getGameRect().isCollide(enemies.get(i).getGameRect())){
-                                bullets.remove(bullets.get(j));
-                                enemies.remove(enemies.get(i));
-                                i--;
-                                j--;
-                            }
+                    //bonus
+                    if(isHeartAppear){
+                        try {
+                            HeartController heart = new HeartController(300,0,Utils.loadImage("res/power-up.png"));
+                            hearts.add(heart);
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
+                        isHeartAppear = false;
                     }
+                    for(HeartController h : hearts){
+                        h.update();
+                    }
+
+                    CollisionManager.instance.update();
+
+//                    for (int i=0;i<enemies.size();i++){
+//                        for (int j=0;j<bullets.size();j++){
+//                            if(bullets.get(j).getGameRect().isCollide(enemies.get(i).getGameRect())){
+//                                bullets.remove(bullets.get(j));
+//                                enemies.remove(enemies.get(i));
+//                                i--;
+//                                j--;
+//                            }
+//                        }
+//                    }
 
                     //draw
                     repaint();
@@ -228,12 +256,44 @@ public class GameWindow extends Frame {
         bufferedGraphics.drawImage(backgroundImage, 0, 0, 600, 750, null);
         player.draw(bufferedGraphics);
 
-        for (Bullet bullet : bullets) {
+        for (BulletController bullet : bullets) {
             bullet.draw(bufferedGraphics);
         }
 
         for (EnemyController enemy : enemies) {
             enemy.draw(bufferedGraphics);
+        }
+
+        for (HeartController heart: hearts){
+            heart.draw(bufferedGraphics);
+        }
+
+        Iterator<EnemyController> enemyControllerIterator = enemies.iterator();
+        while(enemyControllerIterator.hasNext()){
+            EnemyController enemyController = enemyControllerIterator.next();
+            if(enemyController.getGameRect().isDead()){
+                enemyControllerIterator.remove();
+                Random rand = new Random();
+                if(rand.nextInt(10)==1){
+                    isHeartAppear = true;
+                }
+            }
+        }
+
+        Iterator<BulletController> bulletControllerIterator = bullets.iterator();
+        while(bulletControllerIterator.hasNext()){
+            BulletController bulletController = bulletControllerIterator.next();
+            if(bulletController.getGameRect().isDead()){
+                bulletControllerIterator.remove();
+            }
+        }
+
+        Iterator<HeartController> heartControllerIterator = hearts.iterator();
+        while(heartControllerIterator.hasNext()){
+            HeartController heartController = heartControllerIterator.next();
+            if(heartController.getGameRect().isDead()){
+                heartControllerIterator.remove();
+            }
         }
 
         //drawing from buffer to window
