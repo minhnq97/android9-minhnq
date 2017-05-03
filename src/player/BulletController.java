@@ -16,6 +16,8 @@ public class BulletController extends Controller implements Collider{
 
     private int damage =1;
 
+
+
     public BulletController(Image bulletImage, int x, int y) {
         super(new GameRect(x,y,13,33),new ImageRenderer(bulletImage));
         CollisionManager.instance.add(this);
@@ -23,6 +25,10 @@ public class BulletController extends Controller implements Collider{
 
     public GameRect getGameRect() {
         return gameRect;
+    }
+
+    public void setDamage(int damage) {
+        this.damage = damage;
     }
 
     public void getHit(){

@@ -1,6 +1,7 @@
 package game;
 
 import bonus.HeartController;
+import bonus.PowerupController;
 import controller.*;
 import enemy.EnemyController;
 import enemy.SecondEnemyController;
@@ -29,6 +30,7 @@ public class GameWindow extends Frame {
     private PlayerController player;
     private ArrayList<EnemyController> enemies;
     private ArrayList<HeartController> hearts;
+    private ArrayList<PowerupController> powerups;
     private ArrayList<BulletController> bullets;
 
     private BufferedImage bufferedImage;
@@ -47,6 +49,7 @@ public class GameWindow extends Frame {
 
     //generate bonus
     private boolean isHeartAppear;
+    private boolean isPowerupAppear;
 
     public GameWindow() {
         //initialize objects
@@ -61,6 +64,7 @@ public class GameWindow extends Frame {
 
         enemies = new ArrayList<>();
         hearts = new ArrayList<>();
+        powerups = new ArrayList<>();
         bullets = new ArrayList<>();
         player.setBullets(bullets);
         isEnemyAppear = true;
@@ -169,7 +173,6 @@ public class GameWindow extends Frame {
                         e.printStackTrace();
                     }
 
-
                     //player
                     player.processInput(isUpPressed, isDownPressed, isLeftPressed, isRightPressed, isFirePressed);
                     player.update();
@@ -179,7 +182,6 @@ public class GameWindow extends Frame {
                     for (BulletController bullet : bullets) {
                         bullet.update();
                     }
-
 
                     //enemy
                     enemyTime -= 17;
@@ -216,17 +218,30 @@ public class GameWindow extends Frame {
                     }
 
                     //bonus
-                    if(isHeartAppear){
+                    if (isHeartAppear) {
                         try {
-                            HeartController heart = new HeartController(300,0,Utils.loadImage("res/power-up.png"));
+                            HeartController heart = new HeartController(300, 0, Utils.loadImage("res/heart2.png"));
                             hearts.add(heart);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                         isHeartAppear = false;
                     }
-                    for(HeartController h : hearts){
+                    for (HeartController h : hearts) {
                         h.update();
+                    }
+
+                    if (isPowerupAppear) {
+                        try {
+                            PowerupController powerup = new PowerupController(200, 0, Utils.loadImage("res/power-up.png"));
+                            powerups.add(powerup);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        isPowerupAppear = false;
+                    }
+                    for (PowerupController p : powerups) {
+                        p.update();
                     }
 
                     CollisionManager.instance.update();
@@ -264,35 +279,51 @@ public class GameWindow extends Frame {
             enemy.draw(bufferedGraphics);
         }
 
-        for (HeartController heart: hearts){
+        for (HeartController heart : hearts) {
             heart.draw(bufferedGraphics);
         }
 
+        for(PowerupController powerup: powerups){
+            powerup.draw(bufferedGraphics);
+        }
+
         Iterator<EnemyController> enemyControllerIterator = enemies.iterator();
-        while(enemyControllerIterator.hasNext()){
+        while (enemyControllerIterator.hasNext()) {
             EnemyController enemyController = enemyControllerIterator.next();
-            if(enemyController.getGameRect().isDead()){
+            if (enemyController.getGameRect().isDead()) {
                 enemyControllerIterator.remove();
                 Random rand = new Random();
-                if(rand.nextInt(10)==1){
+                int randomBonus = rand.nextInt(15);
+                if (randomBonus == 1) {
                     isHeartAppear = true;
+                }
+                if (randomBonus == 2) {
+                    isPowerupAppear = true;
                 }
             }
         }
 
         Iterator<BulletController> bulletControllerIterator = bullets.iterator();
-        while(bulletControllerIterator.hasNext()){
+        while (bulletControllerIterator.hasNext()) {
             BulletController bulletController = bulletControllerIterator.next();
-            if(bulletController.getGameRect().isDead()){
+            if (bulletController.getGameRect().isDead()) {
                 bulletControllerIterator.remove();
             }
         }
 
         Iterator<HeartController> heartControllerIterator = hearts.iterator();
-        while(heartControllerIterator.hasNext()){
+        while (heartControllerIterator.hasNext()) {
             HeartController heartController = heartControllerIterator.next();
-            if(heartController.getGameRect().isDead()){
+            if (heartController.getGameRect().isDead()) {
                 heartControllerIterator.remove();
+            }
+        }
+
+        Iterator<PowerupController> powerupControllerIterator = powerups.iterator();
+        while (powerupControllerIterator.hasNext()) {
+            PowerupController powerupController = powerupControllerIterator.next();
+            if (powerupController.getGameRect().isDead()) {
+                powerupControllerIterator.remove();
             }
         }
 
