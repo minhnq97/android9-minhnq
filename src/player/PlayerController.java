@@ -4,15 +4,16 @@ import bonus.HeartController;
 import bonus.PowerupController;
 import controller.CollisionManager;
 import controller.Controller;
+import controller.ControllerManager;
 import enemy.EnemyController;
-import game.Collider;
+import controller.Collider;
+import enemy.SecondEnemyController;
 import model.GameRect;
 import util.Utils;
 import view.ImageRenderer;
 
 import java.awt.*;
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * Created by Quang Minh on 11/04/2017.
@@ -21,15 +22,15 @@ public class PlayerController extends Controller implements Collider {
 
     private GameRect gameRect;
     private ImageRenderer imageRenderer;
-    private ArrayList<BulletController> bullets;
     private boolean isCoolDown=false;
     private int cooldownTime=0;
     private int hitPoint = 5;
     private boolean isDead;
     private int powerLevel = 1;
-
+    public static int score=0;
     private int dxPlayer;
     private int dyPlayer;
+    private BulletController bullet;
 
     public PlayerController(Image playerImage, int x, int y) {
         imageRenderer = new ImageRenderer(playerImage);
@@ -37,12 +38,31 @@ public class PlayerController extends Controller implements Collider {
         CollisionManager.instance.add(this);
     }
 
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public int getHitPoint() {
+        return hitPoint;
+    }
+
+    public void setHitPoint(int hitPoint) {
+        this.hitPoint = hitPoint;
+    }
 
     public void draw(Graphics graphics) {
         if(isDead==true){
             return;
         }
         imageRenderer.render(graphics,gameRect);
+    }
+
+    public boolean isDead() {
+        return isDead;
     }
 
     public void setDead(boolean dead) {
@@ -71,7 +91,7 @@ public class PlayerController extends Controller implements Collider {
 
         if (isFirePressed && !isCoolDown) {
             isCoolDown=true;
-            BulletController bullet = null;
+
             if(powerLevel==1){
                 try {
                     bullet = new BulletController(Utils.loadImage("res/bullet.png"), gameRect.getX()+30, gameRect.getY());
@@ -86,7 +106,7 @@ public class PlayerController extends Controller implements Collider {
                 }
             }
 
-            bullets.add(bullet);
+            ControllerManager.instance.add(bullet);
         }
     }
 
@@ -94,12 +114,13 @@ public class PlayerController extends Controller implements Collider {
         gameRect.move(dxPlayer, dyPlayer);
         if(isCoolDown){
             cooldownTime++;
-            System.out.println(cooldownTime);
             if(cooldownTime>20){
                 isCoolDown=false;
                 cooldownTime=0;
             }
         }
+
+
     }
 
     public void getHit(int damage){
@@ -118,9 +139,6 @@ public class PlayerController extends Controller implements Collider {
     }
 
 
-    public void setBullets(ArrayList<BulletController> bullets) {
-        this.bullets = bullets;
-    }
 
     @Override
     public GameRect getGameRect() {
@@ -135,9 +153,11 @@ public class PlayerController extends Controller implements Collider {
         else if(other instanceof EnemyController){
             ((EnemyController)other).getHit(1);
         }
+        else if (other instanceof SecondEnemyController){
+            ((SecondEnemyController)other).getHit(1);
+        }
         else if(other instanceof PowerupController){
             ((PowerupController)other).getHit();
         }
-        System.out.println("Hit point: "+hitPoint);
     }
 }

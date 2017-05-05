@@ -20,6 +20,10 @@ public class Controller {
         this.imageRenderer = imageRenderer;
     }
 
+    public GameRect getGameRect() {
+        return gameRect;
+    }
+
     public void draw(Graphics graphics){
         if(gameRect.isDead()) return;
         imageRenderer.render(graphics,gameRect);

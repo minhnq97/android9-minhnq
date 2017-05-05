@@ -3,7 +3,8 @@ package player;
 import controller.CollisionManager;
 import controller.Controller;
 import enemy.EnemyController;
-import game.Collider;
+import controller.Collider;
+import enemy.SecondEnemyController;
 import model.GameRect;
 import view.ImageRenderer;
 
@@ -17,10 +18,13 @@ public class BulletController extends Controller implements Collider{
     private int damage =1;
 
 
-
     public BulletController(Image bulletImage, int x, int y) {
         super(new GameRect(x,y,13,33),new ImageRenderer(bulletImage));
         CollisionManager.instance.add(this);
+    }
+
+    public int getDamage() {
+        return damage;
     }
 
     public GameRect getGameRect() {
@@ -40,6 +44,11 @@ public class BulletController extends Controller implements Collider{
     public void onCollide(Collider other) {
         if(other instanceof EnemyController){
             ((EnemyController)other).getHit(damage);
+            PlayerController.score+=100;
+        }
+        else if(other instanceof SecondEnemyController){
+            ((SecondEnemyController)other).getHit(damage);
+            PlayerController.score+=150;
         }
     }
 

@@ -3,9 +3,8 @@ package bonus;
 import controller.CollisionManager;
 import controller.Controller;
 import controller.MoveBehavior;
-import game.Collider;
+import controller.Collider;
 import model.GameRect;
-import player.BulletController;
 import player.PlayerController;
 import view.ImageRenderer;
 

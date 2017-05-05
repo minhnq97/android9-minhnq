@@ -7,6 +7,9 @@ import enemy.EnemyController;
 import enemy.SecondEnemyController;
 import player.BulletController;
 import player.PlayerController;
+import scenes.GameScene;
+import scenes.Level1Scene;
+import scenes.MenuScene;
 import util.Utils;
 
 import java.awt.*;
@@ -25,59 +28,29 @@ import java.util.Random;
  * Created by Quang Minh on 08/04/2017.
  */
 public class GameWindow extends Frame {
-    private Image backgroundImage;
     //objects
-    private PlayerController player;
-    private ArrayList<EnemyController> enemies;
-    private ArrayList<HeartController> hearts;
-    private ArrayList<PowerupController> powerups;
-    private ArrayList<BulletController> bullets;
 
     private BufferedImage bufferedImage;
     private Graphics bufferedGraphics;
+    private GameScene currentScene;
 
-    private boolean isUpPressed;
-    private boolean isDownPressed;
-    private boolean isLeftPressed;
-    private boolean isRightPressed;
-    private boolean isFirePressed;
+    public static GameWindow instance;
 
-
-    //generate enemies
-    private int enemyTime = 3000;
-    private boolean isEnemyAppear;
-
-    //generate bonus
-    private boolean isHeartAppear;
-    private boolean isPowerupAppear;
+    public void setCurrentScene(GameScene currentScene) {
+        this.currentScene = currentScene;
+    }
 
     public GameWindow() {
         //initialize objects
+
+        instance = this;
+
         setVisible(true);
         setSize(600, 750);
-
-        try {
-            player = new PlayerController(Utils.loadImage("res/plane3.png"), 260, 670);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        enemies = new ArrayList<>();
-        hearts = new ArrayList<>();
-        powerups = new ArrayList<>();
-        bullets = new ArrayList<>();
-        player.setBullets(bullets);
-        isEnemyAppear = true;
-
         bufferedImage = new BufferedImage(600, 750, BufferedImage.TYPE_INT_ARGB);
         bufferedGraphics = bufferedImage.getGraphics();
 
-        try {
-            backgroundImage = Utils.loadImage("res/background.png");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        currentScene = new MenuScene();
 
         //add listener
         addWindowListener(new WindowListener() {
@@ -125,38 +98,12 @@ public class GameWindow extends Frame {
 
             @Override
             public void keyPressed(KeyEvent keyEvent) {
-                switch (keyEvent.getKeyCode()) {
-                    case KeyEvent.VK_RIGHT:
-                        isRightPressed = true;
-                        break;
-                    case KeyEvent.VK_LEFT:
-                        isLeftPressed = true;
-                        break;
-                    case KeyEvent.VK_UP:
-                        isUpPressed = true;
-                        break;
-                    case KeyEvent.VK_DOWN:
-                        isDownPressed = true;
-                        break;
-                    case KeyEvent.VK_F:
-                        isFirePressed = true;
-                        break;
-                }
+                currentScene.keyPressed(keyEvent);
             }
 
             @Override
             public void keyReleased(KeyEvent keyEvent) {
-                if (keyEvent.getKeyCode() == KeyEvent.VK_RIGHT) {
-                    isRightPressed = false;
-                } else if (keyEvent.getKeyCode() == KeyEvent.VK_LEFT) {
-                    isLeftPressed = false;
-                } else if (keyEvent.getKeyCode() == KeyEvent.VK_UP) {
-                    isUpPressed = false;
-                } else if (keyEvent.getKeyCode() == KeyEvent.VK_DOWN) {
-                    isDownPressed = false;
-                } else if (keyEvent.getKeyCode() == KeyEvent.VK_F) {
-                    isFirePressed = false;
-                }
+                currentScene.keyReleased(keyEvent);
             }
         });
 
@@ -173,91 +120,12 @@ public class GameWindow extends Frame {
                         e.printStackTrace();
                     }
 
-                    //player
-                    player.processInput(isUpPressed, isDownPressed, isLeftPressed, isRightPressed, isFirePressed);
-                    player.update();
+                    currentScene.update();
 
-                    //bullet
-
-                    for (BulletController bullet : bullets) {
-                        bullet.update();
-                    }
-
-                    //enemy
-                    enemyTime -= 17;
-                    if (enemyTime < 0) {
-                        enemyTime = 3000;
-                        isEnemyAppear = true;
-                    }
-
-                    if (isEnemyAppear) {
-                        for (int x = 0; x < getWidth(); x += 100) {
-                            EnemyController enemy = null;
-                            if (x < 300) {
-                                try {
-                                    enemy = new EnemyController(x, 0, Utils.loadImage("res/plane1.png"));
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                                enemy.setMoveBehavior(new MoveBehavior());
-                            } else {
-                                try {
-                                    enemy = new SecondEnemyController(x, 0, Utils.loadImage("res/enemy-green-3.png"));
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                                enemy.setMoveBehavior(new HorzMoveBehavior());
-                            }
-                            enemies.add(enemy);
-                        }
-                        isEnemyAppear = false;
-                    }
-
-                    for (EnemyController e : enemies) {
-                        e.update();
-                    }
-
-                    //bonus
-                    if (isHeartAppear) {
-                        try {
-                            HeartController heart = new HeartController(300, 0, Utils.loadImage("res/heart2.png"));
-                            hearts.add(heart);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        isHeartAppear = false;
-                    }
-                    for (HeartController h : hearts) {
-                        h.update();
-                    }
-
-                    if (isPowerupAppear) {
-                        try {
-                            PowerupController powerup = new PowerupController(200, 0, Utils.loadImage("res/power-up.png"));
-                            powerups.add(powerup);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        isPowerupAppear = false;
-                    }
-                    for (PowerupController p : powerups) {
-                        p.update();
-                    }
+                    ControllerManager.instance.update();
 
                     CollisionManager.instance.update();
 
-//                    for (int i=0;i<enemies.size();i++){
-//                        for (int j=0;j<bullets.size();j++){
-//                            if(bullets.get(j).getGameRect().isCollide(enemies.get(i).getGameRect())){
-//                                bullets.remove(bullets.get(j));
-//                                enemies.remove(enemies.get(i));
-//                                i--;
-//                                j--;
-//                            }
-//                        }
-//                    }
-
-                    //draw
                     repaint();
                 }
             }
@@ -268,64 +136,8 @@ public class GameWindow extends Frame {
     @Override
     public void update(Graphics graphics) {
         //drawing on buffer
-        bufferedGraphics.drawImage(backgroundImage, 0, 0, 600, 750, null);
-        player.draw(bufferedGraphics);
-
-        for (BulletController bullet : bullets) {
-            bullet.draw(bufferedGraphics);
-        }
-
-        for (EnemyController enemy : enemies) {
-            enemy.draw(bufferedGraphics);
-        }
-
-        for (HeartController heart : hearts) {
-            heart.draw(bufferedGraphics);
-        }
-
-        for(PowerupController powerup: powerups){
-            powerup.draw(bufferedGraphics);
-        }
-
-        Iterator<EnemyController> enemyControllerIterator = enemies.iterator();
-        while (enemyControllerIterator.hasNext()) {
-            EnemyController enemyController = enemyControllerIterator.next();
-            if (enemyController.getGameRect().isDead()) {
-                enemyControllerIterator.remove();
-                Random rand = new Random();
-                int randomBonus = rand.nextInt(15);
-                if (randomBonus == 1) {
-                    isHeartAppear = true;
-                }
-                if (randomBonus == 2) {
-                    isPowerupAppear = true;
-                }
-            }
-        }
-
-        Iterator<BulletController> bulletControllerIterator = bullets.iterator();
-        while (bulletControllerIterator.hasNext()) {
-            BulletController bulletController = bulletControllerIterator.next();
-            if (bulletController.getGameRect().isDead()) {
-                bulletControllerIterator.remove();
-            }
-        }
-
-        Iterator<HeartController> heartControllerIterator = hearts.iterator();
-        while (heartControllerIterator.hasNext()) {
-            HeartController heartController = heartControllerIterator.next();
-            if (heartController.getGameRect().isDead()) {
-                heartControllerIterator.remove();
-            }
-        }
-
-        Iterator<PowerupController> powerupControllerIterator = powerups.iterator();
-        while (powerupControllerIterator.hasNext()) {
-            PowerupController powerupController = powerupControllerIterator.next();
-            if (powerupController.getGameRect().isDead()) {
-                powerupControllerIterator.remove();
-            }
-        }
+        currentScene.draw(bufferedGraphics);
+        ControllerManager.instance.draw(bufferedGraphics);
 
         //drawing from buffer to window
         graphics.drawImage(bufferedImage, 0, 0, null);
